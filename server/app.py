@@ -17,7 +17,7 @@ def movie_frame(moviefile):
     body = buf.getvalue()
 
     resp = make_response(body)
-    resp.headers["Content-Type"] = "image/pgm"
+    resp.headers["Content-Type"] = "image/x-portable-graymap"
     resp.headers["Content-Length"] = len(body)
     return resp
 
@@ -27,7 +27,7 @@ def test_pattern():
         body = fd.read()
 
     resp = make_response(body)
-    resp.headers["Content-Type"] = "image/pgm"
+    resp.headers["Content-Type"] = "image/x-portable-graymap"
     resp.headers["Content-Length"] = len(body)
     return resp
 
@@ -54,5 +54,5 @@ def render_inkplate10(frame):
 
     img = Image.open(io.BytesIO(frame))
     img = ImageOps.pad(img, resolution, Image.ANTIALIAS, color=0x000000)
-    img = img.convert("L", dither=Image.FLOYDSTEINBERG, colors=8)
+    img = img.convert("L", dither=Image.FLOYDSTEINBERG, colors=256)
     return img
