@@ -166,8 +166,8 @@ fetchAndDrawOneFrame()
 
     http.end();
 
+#if true
     // draw color bars
-
     int xoff = 100, yoff = 100;
     for (int j = 0; j < 128; j++)
     {
@@ -176,9 +176,10 @@ fetchAndDrawOneFrame()
             // Only 3 bits of color are supported, so i >> 5
             // But the colors are all shades of dark, and then the final white.
             // I think this can probably be optimized by messing with the "waveforms"?
-            display.drawPixel(xoff + i, yoff + j, i >> 5);
+            display.drawPixel(xoff + i, yoff + j, ENCODE_PIXEL_VALUE(i));
         }
     }
+#endif
 
     display.display();
 }
