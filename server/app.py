@@ -21,6 +21,16 @@ def movie_frame(moviefile):
     resp.headers["Content-Length"] = len(body)
     return resp
 
+@app.route("/test-pattern")
+def test_pattern():
+    with open("test-pattern.pgm", "rb") as fd:
+        body = fd.read()
+
+    resp = make_response(body)
+    resp.headers["Content-Type"] = "image/pgm"
+    resp.headers["Content-Length"] = len(body)
+    return resp
+
 def get_frame_ppm(moviefile, timestamp):
     args = [
         "ffmpeg",
