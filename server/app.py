@@ -13,11 +13,21 @@ def movie_frame(moviefile):
     img = render_inkplate10(frame)
 
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
+    img.save(buf, format="PPM")
     body = buf.getvalue()
 
     resp = make_response(body)
-    resp.headers["Content-Type"] = "image/png"
+    resp.headers["Content-Type"] = "image/x-portable-graymap"
+    resp.headers["Content-Length"] = len(body)
+    return resp
+
+@app.route("/test-pattern")
+def test_pattern():
+    with open("test-pattern.pgm", "rb") as fd:
+        body = fd.read()
+
+    resp = make_response(body)
+    resp.headers["Content-Type"] = "image/x-portable-graymap"
     resp.headers["Content-Length"] = len(body)
     return resp
 
@@ -44,5 +54,5 @@ def render_inkplate10(frame):
 
     img = Image.open(io.BytesIO(frame))
     img = ImageOps.pad(img, resolution, Image.ANTIALIAS, color=0x000000)
-    img = img.convert("L", dither=Image.FLOYDSTEINBERG, colors=8)
+    img = img.convert("L", dither=Image.FLOYDSTEINBERG, colors=256)
     return img
