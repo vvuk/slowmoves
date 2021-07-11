@@ -13,11 +13,11 @@ def movie_frame(moviefile):
     img = render_inkplate10(frame)
 
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
+    img.save(buf, format="PPM")
     body = buf.getvalue()
 
     resp = make_response(body)
-    resp.headers["Content-Type"] = "image/png"
+    resp.headers["Content-Type"] = "image/pgm"
     resp.headers["Content-Length"] = len(body)
     return resp
 
