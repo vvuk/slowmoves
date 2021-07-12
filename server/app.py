@@ -57,6 +57,9 @@ def slow_frame_client():
 
     moviefile = "russia.mkv"
 
+    # SAME TIMESTAMP FOR COMPARISON
+    timestamp = 5002
+
     (format, content_type) = select_format()
     body = frame_for_movie(moviefile, timestamp, format)
 
@@ -94,13 +97,23 @@ def frame_for_movie(moviefile, timestamp, format):
     return buf.getvalue()
 
 # Generate palettes
-PALETTE_16_COLORS = []
-for i in range(16):
-    val = i << 5
-    PALETTE_16_COLORS.append(val | (val << 8) | (val << 16))
-PALETTE_16 = hitherdither.palette.Palette(PALETTE_16_COLORS)
+def make_palette(num):
+    colors = []
+    bits = bin(num-1).count("1")
+    for i in range(num):
+        val = i << (8 - bits)
+        if i >= num / 2:
+            val = val | (0xff >> bits)
+        cval = (val | (val << 8) | (val << 16))
+        print(f"{cval:x} ")
+        colors.append(cval)
+    return hitherdither.palette.Palette(colors)
+
+PALETTE_8 = make_palette(8)
+PALETTE_4 = make_palette(4)
+PALETTE_2 = make_palette(2)
 # use this palette
-PALETTE = PALETTE_16
+PALETTE = PALETTE_2
 
 def render_inkplate10(frame):
     resolution = (1200, 825)
