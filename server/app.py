@@ -14,11 +14,18 @@ def movie_frame(moviefile):
     img = render_inkplate10(frame)
 
     buf = io.BytesIO()
-    img.save(buf, format="PPM")
+
+    if "image/x-portable-graymap" in request.headers.get("Accept", ""):
+        content_type = "image/x-portable-graymap"
+        img.save(buf, format="PPM")
+    else:
+        content_type = "image/png"
+        img.save(buf, format="PNG")
+
     body = buf.getvalue()
 
     resp = make_response(body)
-    resp.headers["Content-Type"] = "image/x-portable-graymap"
+    resp.headers["Content-Type"] = content_type
     resp.headers["Content-Length"] = len(body)
     return resp
 
