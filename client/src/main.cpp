@@ -10,7 +10,6 @@ Inkplate display(INKPLATE_3BIT);
 
 #define DELAY_MS 5000
 
-#define SERVER_URL "http://192.168.17.10:8954/test.pgm"
 #define ENCODE_PIXEL_VALUE(v)  ((v) >> 5)
 
 void
@@ -167,7 +166,7 @@ fetchAndDrawOneFrame()
 
     http.end();
 
-#if true
+#if false
     // draw color bars
     int xoff = 100, yoff = 100;
     for (int j = 0; j < 128; j++)

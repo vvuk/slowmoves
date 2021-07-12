@@ -111,5 +111,6 @@ def render_inkplate10(frame):
     img = hitherdither.ordered.bayer.bayer_dithering(img, PALETTE, [256/len(PALETTE), 256/len(PALETTE), 256/len(PALETTE)], order=8)
 
     # PIL can't write mode "P" as PPM, so convert back to grayscale
-    img = img.convert("L")
+    img = img.convert("L", dither=Image.NONE, colors=256)
+
     return img
