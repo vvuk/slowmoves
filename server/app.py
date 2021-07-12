@@ -63,7 +63,7 @@ def get_frame_ppm(moviefile, timestamp):
 
 PALETTE_16_COLORS = []
 for i in range(16):
-    val = i << 15
+    val = i << 5
     PALETTE_16_COLORS.append(val | (val << 8) | (val << 16))
 PALETTE_16 = hitherdither.palette.Palette(PALETTE_16_COLORS)
 PALETTE = PALETTE_16
