@@ -2,7 +2,7 @@ from flask import Flask, request, make_response, abort
 app = Flask(__name__)
 
 import io
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageEnhance
 import subprocess
 import hitherdither
 
@@ -58,7 +58,7 @@ def slow_frame_client():
     moviefile = "russia.mkv"
 
     # SAME TIMESTAMP FOR COMPARISON
-    timestamp = 5002
+    timestamp = 5001
 
     (format, content_type) = select_format()
     body = frame_for_movie(moviefile, timestamp, format)
@@ -113,7 +113,7 @@ PALETTE_8 = make_palette(8)
 PALETTE_4 = make_palette(4)
 PALETTE_2 = make_palette(2)
 # use this palette
-PALETTE = PALETTE_2
+PALETTE = PALETTE_8
 
 def render_inkplate10(frame):
     resolution = (1200, 825)
@@ -121,6 +121,8 @@ def render_inkplate10(frame):
     img = Image.open(io.BytesIO(frame))
     img = ImageOps.pad(img, resolution, Image.ANTIALIAS, color=0x000000)
     #img = img.convert("L", dither=Image.FLOYDSTEINBERG, colors=256)
+    img = ImageEnhance.Contrast(img).enhance(4.0)
+
     img = hitherdither.ordered.bayer.bayer_dithering(img, PALETTE, [256/len(PALETTE), 256/len(PALETTE), 256/len(PALETTE)], order=8)
 
     # PIL can't write mode "P" as PPM, so convert back to grayscale
