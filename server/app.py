@@ -1,4 +1,4 @@
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, abort
 app = Flask(__name__)
 
 import io
@@ -8,6 +8,8 @@ import hitherdither
 
 @app.route("/<string:moviefile>")
 def movie_frame(moviefile):
+    if moviefile == "favicon.ico":
+        abort(404)
     timestamp = float(request.args.get("timestamp", "0"))
 
     frame = get_frame_ppm(moviefile, timestamp)
@@ -52,7 +54,9 @@ def get_frame_ppm(moviefile, timestamp):
 
     proc = subprocess.run(args, capture_output=True)
     if proc.returncode != 0:
+        print("=======\n")
         print(proc.stderr)
+        print("\n=======\n")
         raise Exception("ffmpeg failed")
 
     return proc.stdout
