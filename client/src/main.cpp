@@ -86,6 +86,7 @@ fetchAndDrawOneFrame()
     HTTPClient http;
 
     http.begin(wclient, SERVER_URL);
+    http.addHeader("Accept", "image/x-portable-graymap");
 
     int httpCode = http.GET();
     Serial.printf("Got HTTP Code %d\n", httpCode);
