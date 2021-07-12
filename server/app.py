@@ -75,4 +75,5 @@ def render_inkplate10(frame):
     img = ImageOps.pad(img, resolution, Image.ANTIALIAS, color=0x000000)
     #img = img.convert("L", dither=Image.FLOYDSTEINBERG, colors=256)
     img = hitherdither.ordered.bayer.bayer_dithering(img, PALETTE, [256/len(PALETTE), 256/len(PALETTE), 256/len(PALETTE)], order=8)
+    img = img.convert("L", dither=Image.NONE, colors=256)
     return img
