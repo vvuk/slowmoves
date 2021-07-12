@@ -6,25 +6,24 @@ from PIL import Image, ImageOps
 import subprocess
 import hitherdither
 
+def select_format():
+    format = "PNG"
+    content_type = "image/png"
+
+    if "image/x-portable-graymap" in request.headers.get("Accept", ""):
+        format = "PPM"
+        content_type = "image/x-portable-graymap"
+    
+    return (format, content_type)
+
 @app.route("/<string:moviefile>")
 def movie_frame(moviefile):
     if moviefile == "favicon.ico":
         abort(404)
     timestamp = float(request.args.get("timestamp", "0"))
 
-    frame = get_frame_ppm(moviefile, timestamp)
-    img = render_inkplate10(frame)
-
-    buf = io.BytesIO()
-
-    if "image/x-portable-graymap" in request.headers.get("Accept", ""):
-        content_type = "image/x-portable-graymap"
-        img.save(buf, format="PPM")
-    else:
-        content_type = "image/png"
-        img.save(buf, format="PNG")
-
-    body = buf.getvalue()
+    (format, content_type) = select_format()
+    body = frame_for_movie(moviefile, timestamp, format)
 
     resp = make_response(body)
     resp.headers["Content-Type"] = content_type
@@ -38,6 +37,31 @@ def test_pattern():
 
     resp = make_response(body)
     resp.headers["Content-Type"] = "image/x-portable-graymap"
+    resp.headers["Content-Length"] = len(body)
+    return resp
+
+MAC_TIMESTAMP_TABLE = dict()
+
+@app.route("/slowframe")
+def slow_frame_client():
+    mac = request.args.get("mac", "unknown")
+
+    # TODO better save/lookup
+
+    if mac not in MAC_TIMESTAMP_TABLE:
+        MAC_TIMESTAMP_TABLE[mac] = 5000
+
+    timestamp = MAC_TIMESTAMP_TABLE[mac]
+    MAC_TIMESTAMP_TABLE[mac] = timestamp + 1
+    print(f"Sending frame at timestamp {timestamp}")
+
+    moviefile = "russia.mkv"
+
+    (format, content_type) = select_format()
+    body = frame_for_movie(moviefile, timestamp, format)
+
+    resp = make_response(body)
+    resp.headers["Content-Type"] = content_type
     resp.headers["Content-Length"] = len(body)
     return resp
 
@@ -61,11 +85,21 @@ def get_frame_ppm(moviefile, timestamp):
 
     return proc.stdout
 
+def frame_for_movie(moviefile, timestamp, format):
+    frame = get_frame_ppm(moviefile, timestamp)
+    img = render_inkplate10(frame)
+
+    buf = io.BytesIO()
+    img.save(buf, format=format)
+    return buf.getvalue()
+
+# Generate palettes
 PALETTE_16_COLORS = []
 for i in range(16):
     val = i << 5
     PALETTE_16_COLORS.append(val | (val << 8) | (val << 16))
 PALETTE_16 = hitherdither.palette.Palette(PALETTE_16_COLORS)
+# use this palette
 PALETTE = PALETTE_16
 
 def render_inkplate10(frame):
@@ -75,4 +109,7 @@ def render_inkplate10(frame):
     img = ImageOps.pad(img, resolution, Image.ANTIALIAS, color=0x000000)
     #img = img.convert("L", dither=Image.FLOYDSTEINBERG, colors=256)
     img = hitherdither.ordered.bayer.bayer_dithering(img, PALETTE, [256/len(PALETTE), 256/len(PALETTE), 256/len(PALETTE)], order=8)
+
+    # PIL can't write mode "P" as PPM, so convert back to grayscale
+    img = img.convert("L")
     return img
